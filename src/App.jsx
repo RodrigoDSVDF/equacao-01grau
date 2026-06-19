@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 
 // ------------------------------------------------------------
-// UTILITÁRIOS & HOOKs
+// UTILITÁRIOS & HOOKS
 // ------------------------------------------------------------
 
 // Hook seguro para localStorage
