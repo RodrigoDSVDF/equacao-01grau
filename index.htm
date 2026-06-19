@@ -1,0 +1,1154 @@
+```react
+import React, { useState, useEffect } from 'react';
+import { 
+  Scale, 
+  BookOpen, 
+  CheckCircle, 
+  ArrowRight, 
+  HelpCircle, 
+  RotateCcw, 
+  Award, 
+  Calculator, 
+  Sparkles, 
+  ChevronRight, 
+  Info, 
+  AlertCircle,
+  ThumbsUp
+} from 'lucide-react';
+
+// --- CONFIGURAÇÃO INICIAL E MODELOS DE DADOS ---
+
+const EXEMPLOS_TEORIA = [
+  {
+    titulo: "O que é uma equação?",
+    equacao: "x + 3 = 8",
+    passos: [
+      { expressao: "x + 3 = 8", explicacao: "Temos um número desconhecido 'x' que, somado com 3, resulta em 8." },
+      { expressao: "x + 3 - 3 = 8 - 3", explicacao: "Para isolar o 'x', subtraímos 3 de ambos os lados para manter o equilíbrio." },
+      { expressao: "x = 5", explicacao: "Pronto! Descobrimos que o valor de x é igual a 5." }
+    ]
+  },
+  {
+    titulo: "Equação com Multiplicação",
+    equacao: "3x = 12",
+    passos: [
+      { expressao: "3x = 12", explicacao: "Aqui, o x está sendo multiplicado por 3. Três vezes algum número dá 12." },
+      { expressao: "3x / 3 = 12 / 3", explicacao: "Para cancelar a multiplicação, dividimos ambos os lados por 3." },
+      { expressao: "x = 4", explicacao: "Operação concluída! O valor de x é 4." }
+    ]
+  },
+  {
+    titulo: "O clássico 'Duas Etapas'",
+    equacao: "2x + 5 = 17",
+    passos: [
+      { expressao: "2x + 5 = 17", explicacao: "Primeiro, vamos focar em eliminar o termo independente (+5)." },
+      { expressao: "2x = 17 - 5", explicacao: "Passamos o 5 para o outro lado subtraindo (ou tiramos 5 dos dois lados)." },
+      { expressao: "2x = 12", explicacao: "Simplificamos a conta no lado direito." },
+      { expressao: "x = 12 / 2", explicacao: "Agora, o 2 que estava multiplicando passa dividindo." },
+      { expressao: "x = 6", explicacao: "Excelente! O x vale 6." }
+    ]
+  }
+];
+
+export default function App() {
+  const [activeTab, setActiveTab] = useState('teoria');
+  const [pontos, setPontos] = useState(0);
+  const [conquistas, setConquistas] = useState([]);
+
+  // Função para adicionar conquistas e dar feedback visual
+  const adicionarConquista = (nome) => {
+    if (!conquistas.includes(nome)) {
+      setConquistas([...conquistas, nome]);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans flex flex-col">
+      {/* HEADER */}
+      <header className="bg-gradient-to-r from-indigo-600 to-violet-700 text-white shadow-md py-4 px-6 sticky top-0 z-50">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-white/10 rounded-lg">
+              <Scale className="h-7 w-7 text-amber-300 animate-pulse" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold tracking-tight">Laboratório da Equação</h1>
+              <p className="text-xs text-indigo-100">Dominando o Primeiro Grau de Forma Visual</p>
+            </div>
+          </div>
+
+          {/* Gamificação no Header */}
+          <div className="flex items-center gap-4">
+            <div className="bg-indigo-800/50 px-4 py-1.5 rounded-full border border-indigo-500/30 flex items-center gap-2 text-sm font-semibold">
+              <Sparkles className="h-4 w-4 text-yellow-300 fill-yellow-300" />
+              <span>{pontos} Pontos</span>
+            </div>
+            {conquistas.length > 0 && (
+              <div className="hidden md:flex items-center gap-1.5 bg-violet-800/50 px-3 py-1.5 rounded-full border border-violet-500/30 text-xs">
+                <Award className="h-4 w-4 text-amber-400" />
+                <span>{conquistas.length} Conquista(s)</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* SUB-MENU / NAVEGAÇÃO PRINCIPAL */}
+      <nav className="bg-white border-b border-slate-200 py-2 shadow-sm">
+        <div className="max-w-4xl mx-auto px-4 flex flex-wrap gap-2 justify-center">
+          <button
+            onClick={() => setActiveTab('teoria')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              activeTab === 'teoria' 
+                ? 'bg-indigo-50 text-indigo-700' 
+                : 'text-slate-600 hover:text-indigo-600 hover:bg-slate-50'
+            }`}
+          >
+            <BookOpen className="h-4 w-4" />
+            1. Teoria & Exemplos
+          </button>
+          
+          <button
+            onClick={() => setActiveTab('balanca')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              activeTab === 'balanca' 
+                ? 'bg-indigo-50 text-indigo-700' 
+                : 'text-slate-600 hover:text-indigo-600 hover:bg-slate-50'
+            }`}
+          >
+            <Scale className="h-4 w-4" />
+            2. Laboratório da Balança
+          </button>
+
+          <button
+            onClick={() => setActiveTab('exercicios')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              activeTab === 'exercicios' 
+                ? 'bg-indigo-50 text-indigo-700' 
+                : 'text-slate-600 hover:text-indigo-600 hover:bg-slate-50'
+            }`}
+          >
+            <CheckCircle className="h-4 w-4" />
+            3. Desafio Prático
+          </button>
+
+          <button
+            onClick={() => setActiveTab('calculadora')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              activeTab === 'calculadora' 
+                ? 'bg-indigo-50 text-indigo-700' 
+                : 'text-slate-600 hover:text-indigo-600 hover:bg-slate-50'
+            }`}
+          >
+            <Calculator className="h-4 w-4" />
+            4. Calculadora Passo a Passo
+          </button>
+        </div>
+      </nav>
+
+      {/* ÁREA DE CONTEÚDO */}
+      <main className="flex-1 max-w-6xl w-full mx-auto p-4 md:p-6">
+        {activeTab === 'teoria' && <TeoriaTab onNavigate={() => setActiveTab('balanca')} />}
+        {activeTab === 'balanca' && (
+          <BalancaTab 
+            onWin={() => {
+              setPontos(prev => prev + 50);
+              adicionarConquista("Mestre do Equilíbrio");
+            }} 
+          />
+        )}
+        {activeTab === 'exercicios' && (
+          <ExerciciosTab 
+            onCorrectAnswer={(pontosGanhos) => {
+              setPontos(prev => prev + pontosGanhos);
+              adicionarConquista("Desbravador Álgebrico");
+            }} 
+          />
+        )}
+        {activeTab === 'calculadora' && <CalculadoraTab />}
+      </main>
+
+      {/* FOOTER */}
+      <footer className="bg-slate-800 text-slate-400 py-6 text-center text-xs border-t border-slate-700 mt-auto">
+        <p>© 2026 Laboratório de Matemática • Pratique e domine a álgebra de forma simples e intuitiva.</p>
+        <p className="mt-1 text-slate-500">Desenvolvido com carinho para estudantes de álgebra.</p>
+      </footer>
+    </div>
+  );
+}
+
+// ==========================================
+// 1. COMPONENTE: TEORIA E EXEMPLOS
+// ==========================================
+function TeoriaTab({ onNavigate }) {
+  const [exemploAtivo, setExemploAtivo] = useState(0);
+  const [passoAtual, setPassoAtual] = useState(0);
+
+  const exemplo = EXEMPLOS_TEORIA[exemploAtivo];
+
+  const mudarExemplo = (index) => {
+    setExemploAtivo(index);
+    setPassoAtual(0);
+  };
+
+  return (
+    <div className="grid md:grid-cols-12 gap-6 max-w-5xl mx-auto">
+      {/* Explicação Inicial */}
+      <div className="md:col-span-7 space-y-6">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+          <h2 className="text-xl font-bold text-slate-800 mb-3 flex items-center gap-2 text-indigo-600">
+            <BookOpen className="h-5 w-5" /> De Expressões para Equações
+          </h2>
+          <p className="text-slate-600 mb-4 leading-relaxed text-sm">
+            Nas <strong>expressões algébricas</strong>, você apenas organizava termos como <code className="bg-slate-100 text-indigo-600 px-1.5 py-0.5 rounded font-mono font-semibold">$2x + 5$</code>. Não dava para saber quanto valia o $x$ porque não havia resultado final.
+          </p>
+          <div className="bg-indigo-50 border-l-4 border-indigo-500 p-4 rounded-r-lg mb-4">
+            <h3 className="font-semibold text-indigo-900 text-sm mb-1">A Grande Mudança: O sinal de IGUAL (=)</h3>
+            <p className="text-xs text-indigo-800 leading-relaxed">
+              Agora, ao colocar uma igualdade, como <code className="font-mono">$2x + 5 = 11$</code>, nós criamos uma <strong>Equação</strong>. O sinal de igual age como um compromisso de equilíbrio absoluto: o que está à esquerda pesa exatamente o mesmo que está à direita.
+            </p>
+          </div>
+          <p className="text-slate-600 leading-relaxed text-sm">
+            Isso significa que há apenas <strong>um valor misterioso para o $x$</strong> que torna essa afirmação verdadeira. O nosso objetivo em qualquer equação é <strong>Isolar o X</strong> (deixá-lo sozinho e orgulhoso de um lado da balança) usando operações matemáticas reversas.
+          </p>
+        </div>
+
+        {/* Regras de ouro */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+          <h3 className="text-md font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-amber-500" /> As Duas Regras de Ouro
+          </h3>
+          <div className="space-y-3">
+            <div className="flex gap-3">
+              <div className="h-6 w-6 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-xs shrink-0">1</div>
+              <p className="text-slate-600 text-sm">
+                <strong>O que fizer de um lado, faça do outro:</strong> Se você adicionar 5g no prato esquerdo da balança, deve adicionar 5g no prato direito para mantê-la equilibrada.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <div className="h-6 w-6 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-xs shrink-0">2</div>
+              <p className="text-slate-600 text-sm">
+                <strong>Operações Inversas para atravessar a ponte:</strong> Ao passar um número para o outro lado do sinal de igual, ele faz a operação inversa. Somar vira subtrair, multiplicar vira dividir.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Simulador de Passos Interativos */}
+      <div className="md:col-span-5 space-y-6">
+        <div className="bg-slate-900 text-slate-100 p-6 rounded-2xl shadow-lg border border-slate-800 flex flex-col justify-between h-full min-h-[400px]">
+          <div>
+            <span className="text-xs font-semibold text-indigo-400 tracking-wider uppercase">Laboratório de Demonstração</span>
+            
+            {/* Abas dos exemplos */}
+            <div className="flex gap-1 mt-3 mb-5 border-b border-slate-800 pb-2 overflow-x-auto">
+              {EXEMPLOS_TEORIA.map((ex, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => mudarExemplo(idx)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
+                    exemploAtivo === idx 
+                      ? 'bg-indigo-600 text-white' 
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  Exemplo {idx + 1}
+                </button>
+              ))}
+            </div>
+
+            <h3 className="text-lg font-bold text-white mb-2">{exemplo.titulo}</h3>
+            
+            {/* Container da Equação Central */}
+            <div className="bg-slate-950 rounded-xl p-4 my-4 border border-slate-800/80 text-center">
+              <span className="text-xs text-slate-500 uppercase block mb-1">Passo Atual ({passoAtual + 1} de {exemplo.passos.length})</span>
+              <div className="text-2xl font-mono font-bold tracking-wider text-emerald-400 py-2">
+                {exemplo.passos[passoAtual].expressao}
+              </div>
+            </div>
+
+            {/* Balão de explicação */}
+            <div className="bg-slate-800/80 border border-slate-700/50 p-4 rounded-xl text-sm leading-relaxed text-slate-300">
+              {exemplo.passos[passoAtual].explicacao}
+            </div>
+          </div>
+
+          {/* Controles de navegação do exemplo */}
+          <div className="flex justify-between items-center mt-6 pt-4 border-t border-slate-800">
+            <button
+              onClick={() => setPassoAtual(prev => Math.max(0, prev - 1))}
+              disabled={passoAtual === 0}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                passoAtual === 0 
+                  ? 'text-slate-600 cursor-not-allowed' 
+                  : 'text-slate-300 hover:bg-slate-800'
+              }`}
+            >
+              Anterior
+            </button>
+            <div className="flex gap-1">
+              {exemplo.passos.map((_, idx) => (
+                <span 
+                  key={idx}
+                  className={`h-1.5 w-1.5 rounded-full transition-all ${
+                    idx === passoAtual ? 'bg-indigo-500 w-3' : 'bg-slate-700'
+                  }`}
+                />
+              ))}
+            </div>
+            {passoAtual < exemplo.passos.length - 1 ? (
+              <button
+                onClick={() => setPassoAtual(prev => prev + 1)}
+                className="px-4 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-semibold hover:bg-indigo-500 flex items-center gap-1.5"
+              >
+                Próximo Passo <ChevronRight className="h-3 w-3" />
+              </button>
+            ) : (
+              <button
+                onClick={() => mudarExemplo((exemploAtivo + 1) % EXEMPLOS_TEORIA.length)}
+                className="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold hover:bg-emerald-500 flex items-center gap-1"
+              >
+                Ver Outro Exemplo <RotateCcw className="h-3 w-3" />
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Chamada para ir para o lab prático */}
+      <div className="col-span-12 flex justify-center mt-4">
+        <button
+          onClick={onNavigate}
+          className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-8 py-3.5 rounded-xl shadow-md shadow-indigo-600/20 flex items-center gap-2 hover:-translate-y-0.5 transition-all text-sm"
+        >
+          Ir para o Laboratório Prático da Balança <ArrowRight className="h-4 w-4" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ==========================================
+// 2. COMPONENTE: LABORATÓRIO DA BALANÇA
+// ==========================================
+function BalancaTab({ onWin }) {
+  // Cenários do laboratório
+  const cenarios = [
+    { id: 1, label: "x + 3 = 7", leftX: 1, leftNum: 3, rightX: 0, rightNum: 7, xReal: 4 },
+    { id: 2, label: "2x + 1 = 9", leftX: 2, leftNum: 1, rightX: 0, rightNum: 9, xReal: 4 },
+    { id: 3, label: "3x + 2 = x + 8", leftX: 3, leftNum: 2, rightX: 1, rightNum: 8, xReal: 3 }
+  ];
+
+  const [cenarioAtivo, setCenarioAtivo] = useState(0);
+  
+  // Estados atuais da balança
+  const [leftX, setLeftX] = useState(1);
+  const [leftNum, setLeftNum] = useState(3);
+  const [rightX, setRightX] = useState(0);
+  const [rightNum, setRightNum] = useState(7);
+  
+  const [inputValue, setInputValue] = useState(1);
+  const [logMensagens, setLogMensagens] = useState(["O que você fizer de um lado, faça do outro para não desequilibrar!"]);
+  const [statusResolvido, setStatusResolvido] = useState(false);
+
+  // Carregar cenário
+  const carregarCenario = (idx) => {
+    const c = cenarios[idx];
+    setCenarioAtivo(idx);
+    setLeftX(c.leftX);
+    setLeftNum(c.leftNum);
+    setRightX(c.rightX);
+    setRightNum(c.rightNum);
+    setLogMensagens([`Novo enigma: ${c.label}. Tente isolar o 'x' em um dos lados.`]);
+    setStatusResolvido(false);
+  };
+
+  useEffect(() => {
+    carregarCenario(cenarioAtivo);
+  }, [cenarioAtivo]);
+
+  // Verificar se foi resolvido
+  // Isolado significa: 1x de um lado e 0 números, e do outro lado 0x e N números (ou vice versa)
+  useEffect(() => {
+    const checkWin = () => {
+      if (
+        ((leftX === 1 && leftNum === 0) && (rightX === 0 && rightNum > 0)) ||
+        ((rightX === 1 && rightNum === 0) && (leftX === 0 && leftNum > 0))
+      ) {
+        if (!statusResolvido) {
+          setStatusResolvido(true);
+          const xValue = leftX === 1 ? rightNum : leftNum;
+          setLogMensagens(prev => [
+            ...prev, 
+            `🎉 PARABÉNS! Você isolou com sucesso! O valor de x é ${xValue}.`
+          ]);
+          onWin();
+        }
+      }
+    };
+    checkWin();
+  }, [leftX, leftNum, rightX, rightNum]);
+
+  // Operações
+  const aplicarOperacao = (operacao, valor, lado) => {
+    if (statusResolvido) return;
+
+    let dLeftX = 0, dLeftNum = 0, dRightX = 0, dRightNum = 0;
+    const valNum = parseInt(valor) || 0;
+
+    if (lado === 'ambos') {
+      if (operacao === 'somar') {
+        dLeftNum = valNum; dRightNum = valNum;
+      } else if (operacao === 'subtrair') {
+        dLeftNum = -valNum; dRightNum = -valNum;
+      } else if (operacao === 'subtrair_x') {
+        dLeftX = -valNum; dRightX = -valNum;
+      } else if (operacao === 'multiplicar') {
+        // Multiplica tudo
+        setLeftX(prev => prev * valNum);
+        setLeftNum(prev => prev * valNum);
+        setRightX(prev => prev * valNum);
+        setRightNum(prev => prev * valNum);
+        setLogMensagens(prev => [...prev, `Multiplicados ambos os lados por ${valNum}`]);
+        return;
+      } else if (operacao === 'dividir') {
+        if (valNum === 0) return;
+        setLeftX(prev => prev / valNum);
+        setLeftNum(prev => prev / valNum);
+        setRightX(prev => prev / valNum);
+        setRightNum(prev => prev / valNum);
+        setLogMensagens(prev => [...prev, `Divididos ambos os lados por ${valNum}`]);
+        return;
+      }
+    } else if (lado === 'esquerdo') {
+      if (operacao === 'somar') dLeftNum = valNum;
+      else if (operacao === 'subtrair') dLeftNum = -valNum;
+      else if (operacao === 'subtrair_x') dLeftX = -valNum;
+    } else if (lado === 'direito') {
+      if (operacao === 'somar') dRightNum = valNum;
+      else if (operacao === 'subtrair') dRightNum = -valNum;
+      else if (operacao === 'subtrair_x') dRightX = -valNum;
+    }
+
+    // Aplicar e evitar negativos bizarros para o visual, mas mantendo regras
+    setLeftX(prev => Math.max(0, prev + dLeftX));
+    setLeftNum(prev => Math.max(0, prev + dLeftNum));
+    setRightX(prev => Math.max(0, prev + dRightX));
+    setRightNum(prev => Math.max(0, prev + dRightNum));
+
+    // Mensagem de log
+    let txtLado = lado === 'ambos' ? 'em ambos os lados' : `no lado ${lado}`;
+    let txtOp = '';
+    if (operacao === 'somar') txtOp = `Somado +${valNum}`;
+    else if (operacao === 'subtrair') txtOp = `Subtraído -${valNum}`;
+    else if (operacao === 'subtrair_x') txtOp = `Removido ${valNum}x`;
+
+    setLogMensagens(prev => [...prev, `${txtOp} ${txtLado}.`]);
+  };
+
+  // Cálculo de equilíbrio para inclinar o SVG
+  // Usamos o peso real onde x = valor_real correspondente do cenário. 
+  // Se eles fizerem ações corretas em ambos os lados, o equilíbrio se mantém porque a igualdade é preservada.
+  // Se fizerem ação só em um lado, o equilíbrio quebra!
+  const xRealValor = cenarios[cenarioAtivo].xReal;
+  const pesoEsquerdo = leftX * xRealValor + leftNum;
+  const pesoDireito = rightX * xRealValor + rightNum;
+  const diferenca = pesoEsquerdo - pesoDireito;
+  
+  // Limitar o ângulo para fins estéticos no SVG
+  const anguloInclinacao = Math.max(-15, Math.min(15, diferenca * 1.5));
+
+  return (
+    <div className="max-w-5xl mx-auto space-y-6">
+      {/* Cabeçalho do Tab */}
+      <div className="text-center max-w-2xl mx-auto space-y-2">
+        <h2 className="text-2xl font-bold text-slate-800 flex items-center justify-center gap-2">
+          <Scale className="h-6 w-6 text-indigo-600" /> Laboratório Interativo da Balança
+        </h2>
+        <p className="text-sm text-slate-600">
+          Escolha uma equação problema abaixo. O seu objetivo é deixar apenas <strong>1 caixa verde de x</strong> de um lado e apenas <strong>pesos de ouro</strong> do outro lado. Mantenha a balança sempre alinhada!
+        </p>
+      </div>
+
+      {/* Seleção de Enigmas */}
+      <div className="flex justify-center gap-3">
+        {cenarios.map((cen, idx) => (
+          <button
+            key={cen.id}
+            onClick={() => carregarCenario(idx)}
+            className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+              cenarioAtivo === idx 
+                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/10' 
+                : 'bg-white text-slate-700 hover:bg-indigo-50 border border-slate-200'
+            }`}
+          >
+            Enigma {idx + 1}: {cen.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="grid md:grid-cols-12 gap-6 items-stretch">
+        {/* Painel da Balança Visual (Esquerda) */}
+        <div className="md:col-span-7 bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center min-h-[400px]">
+          {/* Status de Equilíbrio */}
+          <div className="mb-4 text-center">
+            {diferenca === 0 ? (
+              <span className="bg-emerald-100 text-emerald-800 font-bold text-xs px-3 py-1 rounded-full flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping" /> Perfeitamente Equilibrada!
+              </span>
+            ) : (
+              <span className="bg-red-100 text-red-800 font-bold text-xs px-3 py-1 rounded-full flex items-center gap-1.5">
+                <AlertCircle className="h-3 w-3" /> Desequilibrada! Conserte ou desfaça o passo.
+              </span>
+            )}
+          </div>
+
+          {/* SVG DA BALANÇA INTERATIVA */}
+          <svg viewBox="0 0 500 350" className="w-full max-w-[420px] h-auto">
+            {/* Base Estática da Balança */}
+            <path d="M 230 300 L 270 300 L 250 150 Z" fill="#475569" />
+            <rect x="180" y="300" width="140" height="15" rx="4" fill="#334155" />
+            
+            {/* Pino Central de Rotação */}
+            <circle cx="250" cy="150" r="8" fill="#1e293b" />
+
+            {/* Grupo Dinâmico que Rotaciona (Pratos e Barra) */}
+            <g transform={`rotate(${anguloInclinacao} 250 150)`} className="transition-transform duration-500 ease-out">
+              {/* Barra Horizontal Principal */}
+              <rect x="70" y="146" width="360" height="8" rx="3" fill="#64748b" />
+              
+              {/* Cordas e Prato Esquerdo */}
+              <g transform="translate(90, 150)">
+                <line x1="0" y1="0" x2="-40" y2="80" stroke="#94a3b8" strokeWidth="2" />
+                <line x1="0" y1="0" x2="40" y2="80" stroke="#94a3b8" strokeWidth="2" />
+                {/* Prato */}
+                <path d="M -60 80 Q 0 100 60 80 Z" fill="#d97706" stroke="#b45309" strokeWidth="2" />
+                
+                {/* Elementos no Prato Esquerdo */}
+                <g transform="translate(0, 60)">
+                  {/* Renderizar caixas de X (verde) */}
+                  {Array.from({ length: Math.min(6, leftX) }).map((_, i) => (
+                    <g key={`lx-${i}`} transform={`translate(${(i - (Math.min(6, leftX)-1)/2) * 24}, ${-10 - Math.floor(i/3)*15})`}>
+                      <rect x="-10" y="-10" width="20" height="20" rx="3" fill="#10b981" stroke="#047857" strokeWidth="1.5" />
+                      <text x="0" y="4" fill="white" fontSize="10" fontWeight="bold" textAnchor="middle">x</text>
+                    </g>
+                  ))}
+                  {/* Renderizar Pesos Numéricos (ouro) */}
+                  {Array.from({ length: Math.min(10, leftNum) }).map((_, i) => (
+                    <g key={`ln-${i}`} transform={`translate(${(i - (Math.min(10, leftNum)-1)/2) * 16}, ${5 - Math.floor(i/5)*12})`}>
+                      <circle cx="0" cy="0" r="7" fill="#f59e0b" stroke="#d97706" strokeWidth="1" />
+                      <text x="0" y="3" fill="#78350f" fontSize="8" fontWeight="bold" textAnchor="middle">1</text>
+                    </g>
+                  ))}
+                  {/* Se houver excesso */}
+                  {leftNum > 10 && (
+                    <text x="0" y="-30" fill="#b45309" fontSize="10" fontWeight="bold" textAnchor="middle">+{leftNum - 10}g</text>
+                  )}
+                  {leftX > 6 && (
+                    <text x="0" y="-45" fill="#047857" fontSize="10" fontWeight="bold" textAnchor="middle">+{leftX - 6}x</text>
+                  )}
+                </g>
+              </g>
+
+              {/* Cordas e Prato Direito */}
+              <g transform="translate(410, 150)">
+                <line x1="0" y1="0" x2="-40" y2="80" stroke="#94a3b8" strokeWidth="2" />
+                <line x1="0" y1="0" x2="40" y2="80" stroke="#94a3b8" strokeWidth="2" />
+                {/* Prato */}
+                <path d="M -60 80 Q 0 100 60 80 Z" fill="#d97706" stroke="#b45309" strokeWidth="2" />
+
+                {/* Elementos no Prato Direito */}
+                <g transform="translate(0, 60)">
+                  {/* Renderizar caixas de X (verde) */}
+                  {Array.from({ length: Math.min(6, rightX) }).map((_, i) => (
+                    <g key={`rx-${i}`} transform={`translate(${(i - (Math.min(6, rightX)-1)/2) * 24}, ${-10 - Math.floor(i/3)*15})`}>
+                      <rect x="-10" y="-10" width="20" height="20" rx="3" fill="#10b981" stroke="#047857" strokeWidth="1.5" />
+                      <text x="0" y="4" fill="white" fontSize="10" fontWeight="bold" textAnchor="middle">x</text>
+                    </g>
+                  ))}
+                  {/* Renderizar Pesos Numéricos (ouro) */}
+                  {Array.from({ length: Math.min(10, rightNum) }).map((_, i) => (
+                    <g key={`rn-${i}`} transform={`translate(${(i - (Math.min(10, rightNum)-1)/2) * 16}, ${5 - Math.floor(i/5)*12})`}>
+                      <circle cx="0" cy="0" r="7" fill="#f59e0b" stroke="#d97706" strokeWidth="1" />
+                      <text x="0" y="3" fill="#78350f" fontSize="8" fontWeight="bold" textAnchor="middle">1</text>
+                    </g>
+                  ))}
+                  {/* Se houver excesso */}
+                  {rightNum > 10 && (
+                    <text x="0" y="-30" fill="#b45309" fontSize="10" fontWeight="bold" textAnchor="middle">+{rightNum - 10}g</text>
+                  )}
+                  {rightX > 6 && (
+                    <text x="0" y="-45" fill="#047857" fontSize="10" fontWeight="bold" textAnchor="middle">+{rightX - 6}x</text>
+                  )}
+                </g>
+              </g>
+            </g>
+          </svg>
+
+          {/* Equação Atual em Texto Alinhado */}
+          <div className="mt-6 flex items-center justify-between gap-6 w-full max-w-md bg-slate-100 p-4 rounded-xl border border-slate-200 font-mono text-lg font-bold">
+            <div className="text-emerald-700 flex items-center gap-1.5">
+              {leftX > 0 && <span>{leftX === 1 ? '' : leftX}x</span>}
+              {leftX > 0 && leftNum > 0 && <span>+</span>}
+              {leftNum > 0 && <span>{leftNum}</span>}
+              {leftX === 0 && leftNum === 0 && <span>0</span>}
+            </div>
+            <div className="text-indigo-600 text-2xl">=</div>
+            <div className="text-emerald-700 flex items-center gap-1.5">
+              {rightX > 0 && <span>{rightX === 1 ? '' : rightX}x</span>}
+              {rightX > 0 && rightNum > 0 && <span>+</span>}
+              {rightNum > 0 && <span>{rightNum}</span>}
+              {rightX === 0 && rightNum === 0 && <span>0</span>}
+            </div>
+          </div>
+        </div>
+
+        {/* Painel de Controles e Histórico (Direita) */}
+        <div className="md:col-span-5 flex flex-col justify-between space-y-4">
+          {/* Controles de Ação Algébrica */}
+          <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+            <h3 className="font-bold text-slate-800 text-sm border-b border-slate-100 pb-2">Painel de Operações</h3>
+            
+            {/* Valor para a operação */}
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 mb-1">Qual número ou x aplicar?</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  min="1"
+                  max="20"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(parseInt(e.target.value) || 1)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+            </div>
+
+            {/* Ações Inteligentes que mantêm a igualdade */}
+            <div className="space-y-2">
+              <span className="block text-xs font-semibold text-slate-400">Ações em AMBOS os lados (Mantém equilíbrio!)</span>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => aplicarOperacao('somar', inputValue, 'ambos')}
+                  className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 py-2 rounded-lg text-xs font-bold transition-all border border-indigo-200"
+                >
+                  Somar +{inputValue}
+                </button>
+                <button
+                  onClick={() => aplicarOperacao('subtrair', inputValue, 'ambos')}
+                  className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 py-2 rounded-lg text-xs font-bold transition-all border border-indigo-200"
+                >
+                  Subtrair -{inputValue}
+                </button>
+                <button
+                  onClick={() => aplicarOperacao('subtrair_x', inputValue, 'ambos')}
+                  className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 py-2 rounded-lg text-xs font-bold transition-all border border-emerald-200 col-span-2"
+                >
+                  Remover -{inputValue}x
+                </button>
+                <button
+                  onClick={() => aplicarOperacao('dividir', inputValue, 'ambos')}
+                  disabled={inputValue === 0}
+                  className="bg-amber-50 hover:bg-amber-100 text-amber-700 py-2 rounded-lg text-xs font-bold transition-all border border-amber-200"
+                >
+                  Dividir por {inputValue}
+                </button>
+                <button
+                  onClick={() => aplicarOperacao('multiplicar', inputValue, 'ambos')}
+                  className="bg-amber-50 hover:bg-amber-100 text-amber-700 py-2 rounded-lg text-xs font-bold transition-all border border-amber-200"
+                >
+                  Multiplicar por {inputValue}
+                </button>
+              </div>
+            </div>
+
+            {/* Ações Unilaterais (Para experimentar o erro!) */}
+            <div className="space-y-2">
+              <span className="block text-xs font-semibold text-red-400">Ações em apenas UM lado (Cuidado com o tombo!)</span>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => aplicarOperacao('subtrair', inputValue, 'esquerdo')}
+                  className="bg-rose-50 hover:bg-rose-100 text-rose-700 py-1.5 rounded-lg text-xs font-semibold transition-all border border-rose-200"
+                >
+                  Tirar -{inputValue} da Esquerda
+                </button>
+                <button
+                  onClick={() => aplicarOperacao('subtrair', inputValue, 'direito')}
+                  className="bg-rose-50 hover:bg-rose-100 text-rose-700 py-1.5 rounded-lg text-xs font-semibold transition-all border border-rose-200"
+                >
+                  Tirar -{inputValue} da Direita
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Histórico/Log de Ações */}
+          <div className="bg-slate-900 text-slate-300 p-4 rounded-2xl shadow-sm border border-slate-800 flex-1 flex flex-col justify-between min-h-[160px]">
+            <div>
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Histórico do Equilíbrio</span>
+              <div className="mt-2 space-y-1.5 max-h-[140px] overflow-y-auto pr-1 text-xs font-mono">
+                {logMensagens.map((msg, idx) => (
+                  <div key={idx} className="flex gap-2 items-start text-slate-300">
+                    <span className="text-indigo-400 shrink-0">➔</span>
+                    <p>{msg}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Botão Reiniciar */}
+            <div className="pt-3 border-t border-slate-800 flex justify-between items-center mt-3">
+              <span className="text-[10px] text-slate-500 font-sans">
+                {statusResolvido ? "🎉 Resolvido!" : "Isola o x!"}
+              </span>
+              <button
+                onClick={() => carregarCenario(cenarioAtivo)}
+                className="flex items-center gap-1.5 px-3 py-1 bg-slate-800 text-slate-300 rounded-lg text-xs hover:bg-slate-700 font-semibold"
+              >
+                <RotateCcw className="h-3.5 w-3.5" /> Reiniciar Enigma
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ==========================================
+// 3. COMPONENTE: DESAFIOS E EXERCÍCIOS
+// ==========================================
+function ExerciciosTab({ onCorrectAnswer }) {
+  const [level, setLevel] = useState(1);
+  const [exercise, setExercise] = useState(null);
+  const [userAnswer, setUserAnswer] = useState('');
+  const [feedback, setFeedback] = useState(null);
+  const [streak, setStreak] = useState(0);
+  const [dicaAtiva, setDicaAtiva] = useState(false);
+
+  // Gerador de Exercícios do 1º Grau por Nível
+  const gerarExercicio = (lvl) => {
+    let equacao = "";
+    let solucao = 0;
+    let dica = "";
+
+    // Gerar valores aleatórios saudáveis (números inteiros pequenos)
+    const a = Math.floor(Math.random() * 8) + 2; // 2 a 9
+    const b = Math.floor(Math.random() * 12) + 1; // 1 a 12
+    const x = Math.floor(Math.random() * 6) + 2; // 2 a 7 (solução)
+
+    switch(lvl) {
+      case 1: // x + a = b
+        solucao = x;
+        const totalLvl1 = x + b;
+        equacao = `x + ${b} = ${totalLvl1}`;
+        dica = `Subtraia ${b} de ambos os lados para isolar o x: x = ${totalLvl1} - ${b}.`;
+        break;
+      case 2: // ax = b
+        solucao = x;
+        const totalLvl2 = a * x;
+        equacao = `${a}x = ${totalLvl2}`;
+        dica = `O ${a} está multiplicando o x. Passe o ${a} dividindo para o outro lado: x = ${totalLvl2} / ${a}.`;
+        break;
+      case 3: // ax + b = c
+        solucao = x;
+        const totalLvl3 = a * x + b;
+        equacao = `${a}x + ${b} = ${totalLvl3}`;
+        dica = `Primeiro isole o termo com x passando o ${b} subtraindo: ${a}x = ${totalLvl3} - ${b}. Depois divida por ${a}.`;
+        break;
+      case 4: // ax + b = cx + d
+        // Para garantir inteiros: a*x + b = c*x + d => (a-c)*x = d - b
+        // Escolhemos x, a, c tal que a > c
+        const c_coeff = Math.floor(Math.random() * 3) + 1; // 1 a 3
+        const a_coeff = c_coeff + Math.floor(Math.random() * 3) + 1; // maior que c
+        solucao = x;
+        // Escolhemos b de forma que d seja maior que 0
+        const b_val = Math.floor(Math.random() * 5) + 2;
+        const d_val = (a_coeff - c_coeff) * x + b_val;
+        equacao = `${a_coeff}x + ${b_val} = ${c_coeff}x + ${d_val}`;
+        dica = `Coloque todas as variáveis de um lado e números do outro! Subtraia ${c_coeff}x de ambos os lados e depois subtraia ${b_val}.`;
+        break;
+      default:
+        break;
+    }
+
+    setExercise({ equacao, solucao, dica });
+    setUserAnswer('');
+    setFeedback(null);
+    setDicaAtiva(false);
+  };
+
+  useEffect(() => {
+    gerarExercicio(level);
+  }, [level]);
+
+  const checarResposta = () => {
+    if (!exercise) return;
+    const ans = parseFloat(userAnswer);
+    if (ans === exercise.solucao) {
+      setFeedback({ success: true, msg: "Excelente! Você acertou na mosca!" });
+      setStreak(prev => prev + 1);
+      
+      // Pontos com bônus de streak
+      const pontosGanhos = 10 + (streak * 2);
+      onCorrectAnswer(pontosGanhos);
+    } else {
+      setFeedback({ success: false, msg: `Quase lá! Que tal dar uma olhadinha na dica?` });
+      setStreak(0);
+    }
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto space-y-6">
+      {/* Menu Superior de Dificuldade */}
+      <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="flex items-center gap-2">
+          <Award className="h-5 w-5 text-indigo-600" />
+          <h3 className="font-bold text-slate-800">Escolha seu Desafio:</h3>
+        </div>
+        <div className="flex flex-wrap gap-2 justify-center">
+          {[1, 2, 3, 4].map((lvl) => (
+            <button
+              key={lvl}
+              onClick={() => setLevel(lvl)}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                level === lvl 
+                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/10' 
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              Nível {lvl} {lvl === 1 ? "(Básico)" : lvl === 2 ? "(Multiplicação)" : lvl === 3 ? "(Duas Etapas)" : "(Avançado)"}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Cartão Central do Exercício */}
+      {exercise && (
+        <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 max-w-lg mx-auto text-center space-y-6">
+          <div className="space-y-1">
+            <span className="text-xs font-bold text-indigo-500 uppercase tracking-widest">Resolva a Equação</span>
+            <div className="text-4xl font-mono font-extrabold text-slate-800 py-3 tracking-wide select-none">
+              {exercise.equacao}
+            </div>
+          </div>
+
+          {/* Input do Usuário */}
+          <div className="max-w-xs mx-auto space-y-3">
+            <label className="block text-xs font-semibold text-slate-400">Qual o valor de x?</label>
+            <div className="flex gap-2">
+              <input
+                type="number"
+                value={userAnswer}
+                onChange={(e) => setUserAnswer(e.target.value)}
+                placeholder="Ex: 5"
+                onKeyDown={(e) => e.key === 'Enter' && checarResposta()}
+                className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3 text-lg font-mono font-bold text-center focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all"
+              />
+              <button
+                onClick={checarResposta}
+                className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl font-bold text-sm shadow-md hover:-translate-y-0.5 transition-all"
+              >
+                Enviar
+              </button>
+            </div>
+          </div>
+
+          {/* Streak de Acertos */}
+          {streak > 0 && (
+            <p className="text-xs text-amber-600 font-bold flex items-center justify-center gap-1">
+              🔥 Combo de {streak} acertos seguidos!
+            </p>
+          )}
+
+          {/* Feedback Visual */}
+          {feedback && (
+            <div className={`p-4 rounded-xl text-sm font-semibold max-w-sm mx-auto flex items-center justify-center gap-2 border ${
+              feedback.success 
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-800' 
+                : 'bg-rose-50 border-rose-200 text-rose-800'
+            }`}>
+              {feedback.success ? (
+                <>
+                  <ThumbsUp className="h-5 w-5 text-emerald-600" />
+                  <div>
+                    <p className="font-bold">{feedback.msg}</p>
+                    <button
+                      onClick={() => gerarExercicio(level)}
+                      className="mt-1 text-xs text-indigo-600 underline font-bold"
+                    >
+                      Próxima equação ➔
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="text-center">
+                  <p>{feedback.msg}</p>
+                  <button
+                    onClick={() => setDicaAtiva(true)}
+                    className="mt-1 text-xs text-rose-600 font-bold underline"
+                  >
+                    Preciso de uma dica!
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Área de Dica */}
+          {dicaAtiva && (
+            <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl text-left max-w-sm mx-auto">
+              <p className="text-xs font-bold text-amber-800 mb-1 flex items-center gap-1">
+                <HelpCircle className="h-3.5 w-3.5 text-amber-600" /> Super Dica de Ouro:
+              </p>
+              <p className="text-xs text-amber-700 leading-relaxed font-medium">
+                {exercise.dica}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ==========================================
+// 4. COMPONENTE: CALCULADORA DE PASSOS
+// ==========================================
+function CalculadoraTab() {
+  const [equacaoInput, setEquacaoInput] = useState('2x + 4 = 10');
+  const [passosSolucao, setPassosSolucao] = useState([]);
+  const [erro, setErro] = useState('');
+
+  // Resolvedor passo a passo inteligente (simula simplificação de equações lineares ax + b = c)
+  const resolverEquacao = () => {
+    setErro('');
+    setPassosSolucao([]);
+
+    // Sanitização simples da string
+    const eq = equacaoInput.replace(/\s+/g, '');
+    
+    // Validar presença de '=' e apenas uma incógnita 'x'
+    if (!eq.includes('=')) {
+      setErro("Uma equação precisa conter o sinal de igual '='!");
+      return;
+    }
+
+    const lados = eq.split('=');
+    if (lados.length !== 2) {
+      setErro("Formato de equação inválido.");
+      return;
+    }
+
+    const esquerdo = lados[0];
+    const direito = lados[1];
+
+    // Helper simples para parsear termos ax + b
+    const parseLado = (expr) => {
+      // Regex para encontrar termos como '2x', '-3x', '+x', '-x', ou apenas números
+      const regex = /([+-]?[0-9]*x)|([+-]?[0-9]+)/g;
+      const termos = expr.match(regex);
+      
+      let xCoeff = 0;
+      let constant = 0;
+
+      if (!termos) return { xCoeff, constant };
+
+      termos.forEach(termo => {
+        if (termo.includes('x')) {
+          let val = termo.replace('x', '');
+          if (val === '' || val === '+') val = '1';
+          if (val === '-') val = '-1';
+          xCoeff += parseFloat(val);
+        } else {
+          constant += parseFloat(termo);
+        }
+      });
+
+      return { xCoeff, constant };
+    };
+
+    try {
+      const parsedLeft = parseLado(esquerdo);
+      const parsedRight = parseLado(direito);
+
+      // Equação na forma: A*x + B = C*x + D
+      const A = parsedLeft.xCoeff;
+      const B = parsedLeft.constant;
+      const C = parsedRight.xCoeff;
+      const D = parsedRight.constant;
+
+      if (A === 0 && C === 0) {
+        setErro("Essa expressão não possui a variável 'x' para ser resolvida!");
+        return;
+      }
+
+      const passos = [];
+      passos.push({
+        titulo: "Equação Original",
+        expressao: `${esquerdo} = ${direito}`,
+        detalhe: "Esta é a equação inserida pronta para ser desvendada."
+      });
+
+      // Passo 1: Trazer os X para a esquerda
+      if (C !== 0) {
+        const novoA = A - C;
+        passos.push({
+          titulo: "Agrupando os termos com x",
+          expressao: `${A}x ${C > 0 ? '-' : '+'} ${Math.abs(C)}x + ${B} = ${D}`,
+          detalhe: `Subtraímos ${C}x de ambos os lados para agrupar as incógnitas no lado esquerdo.`
+        });
+        passos.push({
+          titulo: "Simplificando as variáveis",
+          expressao: `${novoA}x + ${B} = ${D}`,
+          detalhe: `Somamos os coeficientes de x no lado esquerdo.`
+        });
+      }
+
+      // Variáveis consolidadas no lado esquerdo (novoA * x + B = D)
+      const novoA = A - C;
+      
+      if (novoA === 0) {
+        if (B === D) {
+          setErro("Esta é uma identidade matemática (infinitas soluções). Exemplo: 2 = 2.");
+        } else {
+          setErro("Esta equação é impossível (não possui solução válida).");
+        }
+        return;
+      }
+
+      // Passo 2: Mudar termos independentes para a direita
+      if (B !== 0) {
+        const novoD = D - B;
+        passos.push({
+          titulo: "Isolando o termo com x",
+          expressao: `${novoA}x = ${D} ${B > 0 ? '-' : '+'} ${Math.abs(B)}`,
+          detalhe: `Movemos o número independente (${B}) para o lado direito mudando o seu sinal.`
+        });
+        passos.push({
+          titulo: "Simplificando os números",
+          expressao: `${novoA}x = ${novoD}`,
+          detalhe: "Realizamos a operação aritmética no lado direito."
+        });
+      }
+
+      const finalD = D - B;
+
+      // Passo 3: Isolar completamente o x dividindo
+      if (novoA !== 1) {
+        const resultado = finalD / novoA;
+        passos.push({
+          titulo: "Isolando completamente o x",
+          expressao: `x = ${finalD} / ${novoA}`,
+          detalhe: `O número ${novoA} que estava multiplicando o x passa dividindo para o outro lado.`
+        });
+        passos.push({
+          titulo: "Resultado Final",
+          expressao: `x = ${Number(resultado.toFixed(2))}`,
+          detalhe: "Divisão concluída! Encontramos o valor da nossa incógnita."
+        });
+      } else {
+        passos.push({
+          titulo: "Resultado Final",
+          expressao: `x = ${finalD}`,
+          detalhe: "O x já está completamente isolado. Encontramos a resposta!"
+        });
+      }
+
+      setPassosSolucao(passos);
+    } catch (e) {
+      setErro("Ocorreu um erro ao calcular. Verifique se digitou termos simples como '3x + 5 = 11'.");
+    }
+  };
+
+  return (
+    <div className="grid md:grid-cols-12 gap-6 max-w-5xl mx-auto">
+      {/* Entrada da Equação */}
+      <div className="md:col-span-5 bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+        <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+          <Calculator className="h-5 w-5 text-indigo-600" /> Resolva sua Equação
+        </h2>
+        <p className="text-xs text-slate-500 leading-relaxed">
+          Digite qualquer equação linear simples de primeiro grau do tipo <code className="bg-slate-100 px-1 py-0.5 rounded font-mono">ax + b = c</code> ou <code className="bg-slate-100 px-1 py-0.5 rounded font-mono">ax + b = cx + d</code> para ver o passo a passo completo.
+        </p>
+
+        <div className="space-y-2">
+          <label className="block text-xs font-bold text-slate-600 uppercase">Digite a Equação:</label>
+          <input
+            type="text"
+            value={equacaoInput}
+            onChange={(e) => setEquacaoInput(e.target.value)}
+            placeholder="Ex: 3x - 5 = 10"
+            className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3 font-mono text-lg font-bold text-slate-700 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all"
+          />
+        </div>
+
+        <button
+          onClick={resolverEquacao}
+          className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-sm"
+        >
+          Resolver Passo a Passo <ArrowRight className="h-4 w-4" />
+        </button>
+
+        {erro && (
+          <div className="bg-rose-50 border border-rose-200 p-3 rounded-lg text-xs text-rose-700 flex gap-2 items-start">
+            <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+            <p className="font-semibold">{erro}</p>
+          </div>
+        )}
+
+        <div className="bg-indigo-50 p-4 rounded-xl text-xs space-y-2 text-indigo-900">
+          <h4 className="font-bold flex items-center gap-1"><Info className="h-3.5 w-3.5" /> Exemplos para testar:</h4>
+          <ul className="list-disc pl-4 space-y-1 font-mono">
+            <li><button onClick={() => setEquacaoInput('3x - 5 = 10')} className="hover:underline text-indigo-700 text-left">3x - 5 = 10</button></li>
+            <li><button onClick={() => setEquacaoInput('5x + 3 = 2x + 12')} className="hover:underline text-indigo-700 text-left">5x + 3 = 2x + 12</button></li>
+            <li><button onClick={() => setEquacaoInput('4x = 24')} className="hover:underline text-indigo-700 text-left">4x = 24</button></li>
+          </ul>
+        </div>
+      </div>
+
+      {/* Demonstração dos Passos */}
+      <div className="md:col-span-7 bg-slate-900 text-slate-100 p-6 rounded-2xl shadow-lg border border-slate-800 flex flex-col justify-start min-h-[420px]">
+        <div className="mb-4">
+          <span className="text-xs font-semibold text-indigo-400 tracking-wider uppercase">Caminho da Resolução</span>
+          <h3 className="text-lg font-bold text-white mt-1">Explicação das Etapas</h3>
+        </div>
+
+        {passosSolucao.length > 0 ? (
+          <div className="space-y-4 overflow-y-auto max-h-[380px] pr-2">
+            {passosSolucao.map((passo, idx) => (
+              <div 
+                key={idx} 
+                className={`p-4 rounded-xl border transition-all ${
+                  idx === passosSolucao.length - 1 
+                    ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-100' 
+                    : 'bg-slate-850 border-slate-800 text-slate-300'
+                }`}
+              >
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Etapa {idx}</span>
+                  <span className="text-xs font-semibold text-indigo-400">{passo.titulo}</span>
+                </div>
+                <div className="text-xl font-mono font-bold tracking-wider py-1.5 border-b border-slate-800/60 mb-2">
+                  {passo.expressao}
+                </div>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  {passo.detalhe}
+                </p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="flex-1 flex flex-col items-center justify-center text-center p-6 text-slate-500 space-y-2">
+            <Calculator className="h-10 w-10 text-slate-600" />
+            <p className="text-sm">Insira uma equação ao lado e clique em <strong>"Resolver Passo a Passo"</strong> para ver a mágica algébrica acontecer!</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+```
+
