@@ -3,8 +3,5 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  // Se for fazer deploy num subdiretório (ex: GitHub Pages de projeto,
-  // tipo usuario.github.io/laboratorio-equacao/), descomenta a linha
-  // abaixo e ajusta o nome:
-  // base: '/laboratorio-equacao/',
+  base: '/equacao-01grau/',  // nome do teu repositório
 });
